@@ -18,6 +18,9 @@ dependencyResolutionManagement {
 		mavenCentral()
 		maven {
 			url = uri("https://zello-sdk.s3.amazonaws.com/android/latest")
+			content {
+				includeGroup("com.zello")
+			}
 		}
 	}
 }
