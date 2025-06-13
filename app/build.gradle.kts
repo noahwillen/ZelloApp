@@ -5,7 +5,7 @@ plugins {
 	id("com.google.devtools.ksp") version "1.9.22+"
 	// Uncomment to enable Firebase services. Requires google-services.json file.
 	// Also uncomment the noted line in the project level build.gradle.kts file.
-	// id("com.google.gms.google-services") version "4.4.1"
+	 id("com.google.gms.google-services") version "4.4.1"
 }
 
 hilt {
@@ -102,4 +102,9 @@ dependencies {
 	androidTestImplementation(libs.androidx.junit)
 	androidTestImplementation(libs.androidx.espresso.core)
 	implementation(kotlin("script-runtime"))
+
+	//new
+	implementation(libs.androidx.navigation.compose)
+
+	implementation("androidx.hilt:hilt-navigation-compose:1.2.0")
 }

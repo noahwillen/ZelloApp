@@ -1,6 +1,7 @@
 package com.zello.sdk.example.app.repositories
 
 import android.content.Context
+import android.util.Log
 import android.widget.Toast
 import com.zello.sdk.Zello
 import com.zello.sdk.ZelloAccountStatus
@@ -107,6 +108,7 @@ class ZelloRepository @Inject constructor(
 
 	override fun onConnectFailed(zello: Zello, error: ZelloConnectionError) {
 		Toast.makeText(context, "Failed to connect ${error.name}", Toast.LENGTH_SHORT).show()
+		Log.d("debug", "$error.toString()     ${error.name}")
 		_isConnecting.value = false
 	}
 

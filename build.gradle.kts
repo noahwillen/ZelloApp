@@ -6,7 +6,7 @@ plugins {
 	id("com.google.devtools.ksp") version "1.9.22+"
 	// Uncomment to enable Firebase services. Requires google-services.json file.
 	// Also uncomment the noted line in the app level build.gradle.kts file.
-	// id("com.google.gms.google-services") version "4.4.1" apply false
+	 id("com.google.gms.google-services") version "4.4.1" apply false
 	alias(libs.plugins.androidLibrary) apply false
 }
 buildscript {
