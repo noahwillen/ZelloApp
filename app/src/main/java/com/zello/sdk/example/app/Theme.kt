@@ -19,7 +19,7 @@ import androidx.compose.ui.unit.sp
 private val DarkColorScheme = darkColorScheme(
     background = Color(0xff1e1f22),
     surface = Color(0xff2b2d30),
-    primary = Color(0xff5193cb),
+    primary = Color(0xff0094d0),
     onBackground = Color(0xffffffff),
     onSurface = Color(0xff43454a),
 )
@@ -27,7 +27,7 @@ private val DarkColorScheme = darkColorScheme(
 private val LightColorScheme = lightColorScheme(
     background = Color(0xffffffff),
     surface = Color(0xfff7f8fa),
-    primary = Color(0xff5193cb),
+    primary = Color(0xff0094d0),
     onBackground = Color(0xff43454a),
     onSurface = Color(0xffdfe1e5),
 )

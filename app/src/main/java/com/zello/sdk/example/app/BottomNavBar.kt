@@ -23,14 +23,14 @@ fun BottomNavBar(navController: NavController) {
     var selectedNavIndex by remember { mutableIntStateOf(0)}
     val navItems = listOf(
         NavItem(
-            title = "Recents",
-            icon = Icons.Default.Warning,
-            route = Screen.Recents.rout
-        ),
-        NavItem(
             title = "Channels",
             icon = Icons.Default.Phone,
             route = Screen.Channels.rout
+        ),
+        NavItem(
+            title = "Recents",
+            icon = Icons.Default.Warning,
+            route = Screen.Recents.rout
         )
     )
 

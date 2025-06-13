@@ -14,6 +14,7 @@ import javax.inject.Inject
 import android.util.Log
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
@@ -33,14 +34,24 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.TopAppBarColors
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.unit.TextUnit
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.sp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.rememberNavController
@@ -58,6 +69,7 @@ class MainActivity : AppCompatActivity() {
 
 	@Inject lateinit var repository: ZelloRepository
 
+	@OptIn(ExperimentalMaterial3Api::class)
 	override fun onCreate(savedInstanceState: Bundle?) {
 		super.onCreate(savedInstanceState)
 
@@ -72,6 +84,45 @@ class MainActivity : AppCompatActivity() {
 				Scaffold(
 					modifier = Modifier
 						.fillMaxSize(),
+					topBar = {
+						TopAppBar(
+							navigationIcon = {
+								Image(
+									painter = painterResource(id = R.drawable.csc_logo),
+									contentDescription = "CSC Logo",
+									modifier = Modifier.size(80.dp).padding(10.dp))
+							},
+							colors = TopAppBarDefaults.topAppBarColors(
+								containerColor = Color(0xff0094d0),
+								titleContentColor = MaterialTheme.colorScheme.onPrimary,
+								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
+								actionIconContentColor = MaterialTheme.colorScheme.onPrimary
+							),
+							title = {
+								Text(
+									text= "Zello", style = MaterialTheme.typography.titleLarge,
+									color = MaterialTheme.colorScheme.onBackground,
+									fontWeight = FontWeight.Bold,
+									fontSize = 40.sp
+								)
+							},
+							actions = {
+								var showDialog by remember { mutableStateOf(false) }
+								IconButton(onClick = { showDialog = true }) {
+									Icon(
+										imageVector = Icons.Default.AccountCircle,
+										contentDescription = "Sign In",
+										modifier = Modifier.size(40.dp),
+										tint = MaterialTheme.colorScheme.onBackground
+									)
+								}
+								if (showDialog) {
+									AccountDialog(repository) { showDialog = false }
+								}
+							},
+							modifier = Modifier.shadow(0.dp)
+						)
+					},
 					bottomBar = {BottomNavBar(navController)}
 				) { innerPadding ->
 					val graph =
@@ -90,7 +141,6 @@ class MainActivity : AppCompatActivity() {
 						graph = graph,
 						modifier = Modifier.padding(innerPadding)
 					)
-					AccountDialog(repository)
 				}
 			}
 		}
@@ -99,105 +149,62 @@ class MainActivity : AppCompatActivity() {
 	}
 }
 
-
 @Composable
-fun AccountDialog(
-	repository: ZelloRepository) {
-	var showDialog by remember { mutableStateOf(false)}
+fun AccountDialog(repository: ZelloRepository, onDismissRequest: () -> Unit) {
 	var network by remember { mutableStateOf("")}
 	var username by remember { mutableStateOf("")}
 	var password by remember { mutableStateOf("")}
 	val isConnected by repository.isConnected.collectAsState()
 
-	IconButton(
-		onClick = {showDialog = true},
-		modifier = Modifier
-			.windowInsetsPadding(WindowInsets.statusBars)
-			.size(48.dp)
-	) {
-		Icon(
-			imageVector = Icons.Default.AccountCircle,
-			contentDescription = "Sign In",
-			modifier = Modifier.size(40.dp),
-			tint = MaterialTheme.colorScheme.onBackground
+	network = "concretesupplyco"
+	username = "noah.willen"
+	password = "Ekansarboc20$"
+
+	if (isConnected) {
+		AlertDialog(
+			onDismissRequest = onDismissRequest,
+			title = { Text("Account") },
+			text = {
+				Column {
+					OutlinedTextField(value = network, onValueChange = {}, label = { Text("Network") }, singleLine = true, readOnly = true)
+					Spacer(modifier = Modifier.height(8.dp))
+					OutlinedTextField(value = username, onValueChange = {}, label = { Text("Username") }, singleLine = true, readOnly = true)
+				}
+			},
+			confirmButton = {
+				Button(onClick = { repository.zello.disconnect() }) {
+					Text("Sign Out")
+				}
+			}
+		)
+	} else {
+		AlertDialog(
+			onDismissRequest = onDismissRequest,
+			title = { Text("Sign In") },
+			text = {
+				Column {
+					OutlinedTextField(value = network, onValueChange = {network = it}, label = { Text("Network") }, singleLine = true)
+					Spacer(modifier = Modifier.height(8.dp))
+					OutlinedTextField(value = username, onValueChange = {username = it}, label = { Text("Username") }, singleLine = true)
+					Spacer(modifier = Modifier.height(8.dp))
+					OutlinedTextField(value = password, onValueChange = {password = it}, label = { Text("Password") }, singleLine = true, visualTransformation = PasswordVisualTransformation())
+					Spacer(modifier = Modifier.height(8.dp))
+				}
+			},
+			confirmButton = {
+				Button(onClick = {
+					repository.zello.connect(ZelloCredentials(network,username,password))
+					onDismissRequest()
+				}) {
+					Text("Ok")
+				}
+			},
+			dismissButton = {
+				Button(onClick = onDismissRequest) {
+					Text("Cancel")
+				}
+			}
 		)
 	}
-	if (showDialog) {
-		if (isConnected) {
-			AlertDialog(
-				onDismissRequest = { showDialog = false},
-				title = {Text("Account")},
-				text = {
-					Column {
-						OutlinedTextField(
-							value = network,
-							onValueChange = {},
-							label = {Text("Network")},
-							singleLine = true,
-							readOnly = true
-						)
-						Spacer(modifier = Modifier.height(8.dp))
-						OutlinedTextField(
-							value = username,
-							onValueChange = {},
-							label = {Text("Username")},
-							singleLine = true,
-							readOnly = true
-						)
-					}
-			    },
-				confirmButton = {
-					Button(onClick = {
-						repository.zello.disconnect()
-					}) {
-						Text("Sign Out")
-					}
-				}
-			)
-		} else {
-			AlertDialog(
-				onDismissRequest = {showDialog = false},
-				title = {Text("Sign In")},
-				text = {
-					Column {
-						OutlinedTextField(
-							value = network,
-							onValueChange = {network = it},
-							label = {Text("Network")},
-							singleLine = true
-						)
-						Spacer(modifier = Modifier.height(8.dp))
-						OutlinedTextField(
-							value = username,
-							onValueChange = {username = it},
-							label = {Text("Username")},
-							singleLine = true
-						)
-						Spacer(modifier = Modifier.height(8.dp))
-						OutlinedTextField(
-							value = password,
-							onValueChange = {password = it},
-							label = {Text("Password")},
-							singleLine = true,
-							visualTransformation = PasswordVisualTransformation()
-						)
-						Spacer(modifier = Modifier.height(8.dp))
-					}
-				},
-				confirmButton = {
-					Button(onClick = {
-						repository.zello.connect(ZelloCredentials(network, username, password))
-						showDialog = false
-					}) {
-						Text("Ok")
-					}
-				},
-				dismissButton = {
-					Button(onClick = {showDialog = false}) {
-						Text("Cancel")
-					}
-				}
-			)
-		}
-	}
 }
+
