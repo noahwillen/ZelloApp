@@ -12,6 +12,7 @@ import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import android.util.Log
+import android.view.KeyEvent
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.Image
@@ -93,7 +94,7 @@ class MainActivity : AppCompatActivity() {
 									modifier = Modifier.size(80.dp).padding(10.dp))
 							},
 							colors = TopAppBarDefaults.topAppBarColors(
-								containerColor = Color(0xff0094d0),
+								containerColor = MaterialTheme.colorScheme.primary,
 								titleContentColor = MaterialTheme.colorScheme.onPrimary,
 								navigationIconContentColor = MaterialTheme.colorScheme.onPrimary,
 								actionIconContentColor = MaterialTheme.colorScheme.onPrimary
@@ -147,6 +148,16 @@ class MainActivity : AppCompatActivity() {
 
 		PermissionsManager(this).requestPermissions()
 	}
+
+	override fun onKeyDown(keyCode: Int, event: KeyEvent): Boolean {
+		Log.d("PTT Debug", "Key pressed: $keyCode")
+		if (keyCode == KeyEvent.KEYCODE_HEADSETHOOK) { // Common for PTT buttons
+			println("sdfsd")
+			return true
+		}
+		return super.onKeyDown(keyCode, event)
+	}
+
 }
 
 @Composable
@@ -155,10 +166,6 @@ fun AccountDialog(repository: ZelloRepository, onDismissRequest: () -> Unit) {
 	var username by remember { mutableStateOf("")}
 	var password by remember { mutableStateOf("")}
 	val isConnected by repository.isConnected.collectAsState()
-
-	network = "concretesupplyco"
-	username = "noah.willen"
-	password = "Ekansarboc20$"
 
 	if (isConnected) {
 		AlertDialog(

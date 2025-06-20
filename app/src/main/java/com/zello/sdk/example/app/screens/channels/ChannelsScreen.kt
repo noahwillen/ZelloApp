@@ -1,5 +1,7 @@
 package com.zello.sdk.example.app.screens.channels
 
+import android.annotation.SuppressLint
+import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -33,10 +35,16 @@ import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.draw.shadow
+import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.key.onKeyEvent
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.unit.dp
 import com.zello.sdk.ZelloChannel
+import com.zello.sdk.ZelloOutgoingVoiceMessage
 
 @Composable
 fun ChannelsScreen(viewModel: ChannelsViewModel) {
@@ -57,6 +65,7 @@ fun ChannelsScreen(viewModel: ChannelsViewModel) {
     }
 }
 
+@SuppressLint("UnusedBoxWithConstraintsScope")
 @Composable
 fun ChannelItem(
     channel: ZelloChannel,
@@ -65,7 +74,10 @@ fun ChannelItem(
 ) {
     val outgoingVoiceMessageViewState = viewModel.outgoingVoiceMessageViewState.observeAsState().value
     val incomingVoiceMessageViewState = viewModel.incomingVoiceMessageViewState.observeAsState().value
-    val isTalking = outgoing
+    val isSameContact = outgoingVoiceMessageViewState?.contact?.isSameAs(channel) == true
+    val isConnecting = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.CONNECTING
+    val isTalking = isSameContact && outgoingVoiceMessageViewState?.state == ZelloOutgoingVoiceMessage.State.SENDING
+    val isReceiving = incomingVoiceMessageViewState?.contact?.isSameAs(channel) == true
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -142,10 +154,11 @@ fun ChannelItem(
                                     )
                                 }
                                 .size(parentWidth * 0.6f)
+                                .shadow(12.dp, shape = CircleShape)
                                 .background(MaterialTheme.colorScheme.primary, shape = CircleShape)
-                                .border(3.dp, color = if (isTalking) Color.Red else if (isReceiving) Color.Green else MaterialTheme.colorScheme.primary, CircleShape)
-                                .clip(CircleShape),
-                            contentAlignment = Alignment.Center
+                                .border(8.dp, color = if (isTalking) Color.Red else if (isReceiving) Color.Green else MaterialTheme.colorScheme.primary, CircleShape)
+                                .clip(CircleShape)
+                            ,contentAlignment = Alignment.Center
                         ) {
                             Icon(
                                 imageVector = Icons.Default.Mic,
@@ -155,6 +168,8 @@ fun ChannelItem(
                         }
                     }
                 }
+
+
             }
         }
     }
